@@ -1,23 +1,70 @@
-import logo from './logo.svg';
-import './App.css';
+import "./App.css";
+import Form from "./components/Form";
+import TodoList from "./components/TodoList";
+import { useState, useEffect } from "react";
 
 function App() {
+  //States
+  const [input, setInput] = useState("");
+  const [todos, setTodos] = useState([]);
+  const [status, setStatus] = useState("all");
+  const [filteredTodos, setFilteredTodos] = useState([]);
+
+  const filterHandler = () => {
+    switch (status) {
+      case "completed":
+        setFilteredTodos(todos.filter((todo) => todo.complete === true));
+        break;
+      case "uncompleted":
+        setFilteredTodos(todos.filter((todo) => todo.complete === false));
+        break;
+      default:
+        setFilteredTodos(todos);
+    }
+    console.log(filteredTodos);
+  };
+
+  //order of useEffect matters!
+  useEffect(() => {
+    getLocalTodos();
+  }, []);
+
+  useEffect(() => {
+    filterHandler();
+    saveLocalTodos();
+  }, [todos, status]);
+
+  
+
+  
+  const saveLocalTodos = () => {
+    localStorage.setItem("todos", JSON.stringify(todos));
+  };
+
+  const getLocalTodos = () => {
+    if (localStorage.getItem('todos') === null) {
+      localStorage.setItem("todos", JSON.stringify([]));
+    } else {
+      let todoLocal = JSON.parse(localStorage.getItem('todos'))
+      setTodos(todoLocal)
+    }
+  };
+
+
+
   return (
     <div className="App">
-      <header className="App-header">
-        <img src={logo} className="App-logo" alt="logo" />
-        <p>
-          Edit <code>src/App.js</code> and save to reload.
-        </p>
-        <a
-          className="App-link"
-          href="https://reactjs.org"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
-          Learn React
-        </a>
+      <header>
+        <h1>My to do list</h1>
       </header>
+      <Form
+        input={input}
+        todos={todos}
+        setInput={setInput}
+        setTodos={setTodos}
+        setStatus={setStatus}
+      />
+      <TodoList todos={filteredTodos} setTodos={setTodos} status={status} />
     </div>
   );
 }
